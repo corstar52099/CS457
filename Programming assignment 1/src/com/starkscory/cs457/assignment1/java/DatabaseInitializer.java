@@ -1,13 +1,20 @@
+package com.starkscory.cs457.assignment1.java;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.Scanner;
 
-public class DatabaseInitializer extends DatabaseTool{
+public class DatabaseInitializer extends DatabaseTool {
+    private DirectoryScan init =  new DirectoryScan();
     //Database intiializer is going to initialize a database that has some information.
     //Information that is stored in a parent class
-    public void init () {
-         DirectoryScan init =  new DirectoryScan();
+    public String init () {
          init.addNewDirectory();
+         return "Database Successfully created!";
+    }
 
+    public void tableInit () throws IOException {
+        init.createTable();
     }
 }
 //TODO: Step 1: Create Database Folder if one does not exist

@@ -1,4 +1,7 @@
+package com.starkscory.cs457.assignment1.java;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -6,8 +9,8 @@ import java.util.Set;
 public class DirectoryScan{
     private String workingDirectory;
     private Scanner scan;
-    private Integer folderNumberIterator;
-    private Integer fileNumberIterator;
+    private Integer folderNumberIterator = 1;
+    private Integer fileNumberIterator = 1;
     private static File folder;
     private static File[] listOfFiles;
     private static Set<String> setOfDirectoryNames;
@@ -41,10 +44,21 @@ public class DirectoryScan{
     public String scanDirectory(){ return this.scan.next(); }
 
     public boolean addNewDirectory() {
-        //TODO:add a default directory
-        return false;
+        File newDirectory = new File(this.workingDirectory + folderNumberIterator + "_Database");
+        return newDirectory.mkdir();
     }
-
+    public boolean addNewDirectory(String addedDirectory) {
+        int duplicateIterator = 0;
+        if (doesThisDirectoryExist(addedDirectory)) {
+            while (doesThisDirectoryExist(addedDirectory + duplicateIterator)) {
+                duplicateIterator++;
+            }
+            File newDirectory = new File(this.workingDirectory + addedDirectory + duplicateIterator);
+            return newDirectory.mkdir();
+        }
+        File newDirectory = new File(this.workingDirectory + addedDirectory);
+        return newDirectory.mkdir();
+    }
     public boolean doesThisDirectoryExist(String thisDirectory){
         //TODO: error catching
         for (String d : setOfDirectoryNames) {
@@ -53,5 +67,10 @@ public class DirectoryScan{
             }
         }
         return true;
+    }
+
+    public boolean createTable() throws IOException {
+        TableHelper.createDefaultTable(fileNumberIterator, workingDirectory);
+        return false;
     }
 }
