@@ -5,8 +5,8 @@ import java.io.IOException;
 
 
 public class TableHelper {
-    public static void createDefaultTable(int defNum, String workingDirectory) throws IOException {
-        File myObj = new File(workingDirectory + defNum + "_Table.txt");
+    public static void createDefaultTable(int defNum, String workingDirectory, String loadedDatabase) throws IOException {
+        File myObj = new File(workingDirectory + "/" + loadedDatabase + "/" + defNum + "_Table.txt");
         try {
             if (myObj.createNewFile()) {
                 System.out.println("Default table created successfully\n");

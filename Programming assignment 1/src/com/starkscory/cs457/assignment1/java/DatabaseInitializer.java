@@ -16,6 +16,16 @@ public class DatabaseInitializer extends DatabaseTool {
     public void tableInit () throws IOException {
         init.createTable();
     }
+
+    public void printLoadOptions() {
+        //for (String  init.getSetOfDirectoryNames()) {
+          //  System.out.println(i + init.getSetOfDirectoryNames().);
+        //}
+    }
+
+    public void handleLoadMenuOption () {
+
+    }
 }
 //TODO: Step 1: Create Database Folder if one does not exist
 //get current directory

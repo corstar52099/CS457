@@ -8,6 +8,7 @@ import java.util.Set;
 
 public class DirectoryScan{
     private String workingDirectory;
+    private String loadedDatabaseName;
     private Scanner scan;
     private Integer folderNumberIterator = 1;
     private Integer fileNumberIterator = 1;
@@ -15,27 +16,26 @@ public class DirectoryScan{
     private static File[] listOfFiles;
     private static Set<String> setOfDirectoryNames;
     private static Set<String> setOfFileNames;
-
+    //TODO: Handle loaded database errors
     public DirectoryScan(){
-        this.scan = new Scanner(System.in);
-        this.workingDirectory = System.getProperty("user.dir");
+        scan = new Scanner(System.in);
+        workingDirectory = new File("").getAbsolutePath();
+        loadedDatabaseName = null;
         setOfDirectoryNames =  new HashSet<>();
         setOfFileNames = new HashSet<>();
         folder = new File(workingDirectory);
         listOfFiles = folder.listFiles();
-        for (File itFile : listOfFiles) {
-            for (int i = 0; i < listOfFiles.length; i++) {
-                if (listOfFiles[i].isFile()) {
-                    if (listOfFiles[i].getName().contains("_Table")){
-                        fileNumberIterator++;
-                    }
-                    setOfFileNames.add(listOfFiles[i].getName());
-                } else if (listOfFiles[i].isDirectory()) {
-                    if (listOfFiles[i].getName().contains("_Database")){
-                        folderNumberIterator++;
-                    }
-                    setOfDirectoryNames.add(listOfFiles[i].getName());
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile()) {
+                if (listOfFiles[i].getName().contains("_Table")){
+                    fileNumberIterator++;
                 }
+                setOfFileNames.add(listOfFiles[i].getName());
+            } else if (listOfFiles[i].isDirectory()) {
+                if (listOfFiles[i].getName().contains("_Database")){
+                    folderNumberIterator++;
+                }
+                setOfDirectoryNames.add(listOfFiles[i].getName());
             }
         }
         //TODO: error catching
@@ -44,7 +44,9 @@ public class DirectoryScan{
     public String scanDirectory(){ return this.scan.next(); }
 
     public boolean addNewDirectory() {
-        File newDirectory = new File(this.workingDirectory + folderNumberIterator + "_Database");
+        File newDirectory = new File(folderNumberIterator + "_Database");
+        this.loadedDatabaseName = folderNumberIterator + "_Database";
+        folderNumberIterator++;
         return newDirectory.mkdir();
     }
     public boolean addNewDirectory(String addedDirectory) {
@@ -69,8 +71,17 @@ public class DirectoryScan{
         return true;
     }
 
+    public void loadDatabase (String databaseToLoad) {
+        this.loadedDatabaseName = databaseToLoad;
+    }
+
     public boolean createTable() throws IOException {
-        TableHelper.createDefaultTable(fileNumberIterator, workingDirectory);
+        TableHelper.createDefaultTable(fileNumberIterator, workingDirectory, loadedDatabaseName);
+        fileNumberIterator++;
         return false;
+    }
+
+    public Set<String> getSetOfDirectoryNames () {
+        return this.setOfDirectoryNames;
     }
 }

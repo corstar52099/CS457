@@ -23,7 +23,9 @@ public class DatabaseManager {
                 System.out.println(Init.init());
                 menuFlag = true;
             } else if (option == 2) {
-                //Load existing database option
+                //TODO: Implement Load existing database option
+                System.out.println("Which database would you like to load?: ");
+                Init.printLoadOptions();
                 menuFlag = true;
             } else {
                 System.out.println("Please enter a valid option!");
