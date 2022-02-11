@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class DatabaseManager {
     public static void main(String[] args) throws IOException {
 
-        DatabaseInitializerParser Init= new DatabaseInitializerParser();
+        DatabaseInitializer Init= new DatabaseInitializer();
         System.out.println("Welcome to Cory's Database management tool\n");
         boolean menuFlag = false;
         //eventually add option to create new database or load a different database again.
