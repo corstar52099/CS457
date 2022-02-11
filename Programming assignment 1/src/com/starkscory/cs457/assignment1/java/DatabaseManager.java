@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class DatabaseManager {
     public static void main(String[] args) throws IOException {
 
-        DatabaseInitializer Init= new DatabaseInitializer();
+        DatabaseInitializerParser Init= new DatabaseInitializerParser();
         System.out.println("Welcome to Cory's Database management tool\n");
         boolean menuFlag = false;
         //eventually add option to create new database or load a different database again.
@@ -31,18 +31,11 @@ public class DatabaseManager {
                 System.out.println("Please enter a valid option!");
             }
         }
-
+        String command;
+        Scanner commandScan = new Scanner(System.in).useDelimiter(";");
         while (menuFlag) {
-            printLoopMenu();
-            option = mainScan.nextInt();
-            switch (option) {
-                case 1:
-                    Init.tableInit();
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-            }
+            //continuously loop
+            command = commandScan.next();
             //print()
         }
         //start the database
