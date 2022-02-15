@@ -11,40 +11,18 @@ public class DatabaseManager {
 
         DatabaseInitializer Init= new DatabaseInitializer();
         System.out.println("Welcome to Cory's Database management tool\n");
-        boolean menuFlag = false;
-        //eventually add option to create new database or load a different database again.
-        printStartMenu();
-        Scanner mainScan = new Scanner(System.in);
-        int option = 0;
-        while (!menuFlag) {
-            option = mainScan.nextInt();
-            if (option == 1) {
-                //create new database option
-                System.out.println(Init.init());
-                menuFlag = true;
-            } else if (option == 2) {
-                //TODO: Implement Load existing database option
-                System.out.println("Which database would you like to load?: ");
-                Init.printLoadOptions();
-                menuFlag = true;
-            } else {
-                System.out.println("Please enter a valid option!");
+        while (true) {
+            String output = Init.startCommandReading();
+            System.out.println(output);
+            if (output.equals("exit")) {
+                return;
             }
         }
-        String command;
-        Scanner commandScan = new Scanner(System.in).useDelimiter(";");
-        while (menuFlag) {
-            //continuously loop
-            command = commandScan.next();
-            //print()
-        }
         //start the database
-
-        //TODO: Implement Multiple commands such as: CREATE_DATABASE,
-        // DELETE_DATABASE, CREATE TABLE, DELETE TABLE, UPDATE, QUERY
+        //TODO: Implement Multiple commands such as: UPDATE, QUERY
     }
-
-    //TODO: possibly implement cusomizable menu with config
+}
+/*The land of dinosoars
     static public void printStartMenu() {
         System.out.println("Cory's Database Management Tool:\n" +
                 "--------------------------------\n" +
@@ -63,4 +41,20 @@ public class DatabaseManager {
                 "5: Exit\n" +
                 "Which would you like to do?: ");
     }
-}
+            Scanner mainScan = new Scanner(System.in);
+        int option = 0;
+        while (!menuFlag) {
+            option = mainScan.nextInt();
+            if (option == 1) {
+                //create new database option
+                System.out.println(Init.init());
+                menuFlag = true;
+            } else if (option == 2) {
+                //TODO: Implement Load existing database option
+                System.out.println("Which database would you like to load?: ");
+                Init.printLoadOptions();
+                menuFlag = true;
+            } else {
+                System.out.println("Please enter a valid option!");
+            }
+* */
