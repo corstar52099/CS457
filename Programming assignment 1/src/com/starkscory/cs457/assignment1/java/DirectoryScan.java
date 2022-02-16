@@ -2,9 +2,7 @@ package com.starkscory.cs457.assignment1.java;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 //TODO: file number interator does not work with current implementation of loaded database;
 
@@ -82,22 +80,27 @@ public class DirectoryScan{
         }
         return "Failed to make database.";
     }
-    public static String deleteDirectory(File file)
+    public String deleteDatabase(String databaseToDelete)
     {
+        File deletingDirectory = new File(this.workingDirectory + "/" + databaseToDelete);
         // store all the paths of files and folders present
         // inside directory
-        for (File subfile : file.listFiles()) {
+        if (!this.doesThisDirectoryExist(databaseToDelete)) {
+            return "Cannot delete " + databaseToDelete + " because it does not exist in " + this.workingDirectory + "/.";
+        }
+        for (File subfile : deletingDirectory.listFiles()) {
 
             // if it is a subfolder,e.g Rohan and Ritik,
             // recursiley call function to empty subfolder
             if (subfile.isDirectory()) {
-                deleteDirectory(subfile);
+                deleteDatabase(subfile.toString());
             }
 
             // delete files and empty subfolders
             subfile.delete();
         }
-        return "Deleted database and tables within";
+        deletingDirectory.delete();
+        return "Deleted " + databaseToDelete + " successfully";
     }
     public boolean doesThisDirectoryExist(String thisDirectory){
         //TODO: error catching
@@ -115,18 +118,49 @@ public class DirectoryScan{
 
     public String createTable() throws IOException {
         if (this.workingDirectory.equals(null)) {
-            return "You have not loaded a DATABASE. USE {DATABASE_NAME} <--- Usage to load a database to use";
+            return "You have not loaded a DATABASE. USE {DATABASE_NAME}; <--- Usage to load a database";
         }
         this.fileNumberIterator++;
         return TableHelper.createDefaultTable(this.fileNumberIterator, this.workingDirectory, this.loadedDatabaseName);
     }
 
     public String createTable(String tableToCreate) {
-        if (this.workingDirectory.equals(null)) {
+        String tableCreationSyntaxError = "Invalid table entry format. CREATE TABLE {TABLE_NAME} ({attribute_1} {attribute_type_1}, ... ,{attribute_n} {attribute_type_n})";
+        Map<String, String> mapOfAttributes = new HashMap<>();
+        if (this.loadedDatabaseName == null) {
             return "You have not loaded a DATABASE. USE {DATABASE_NAME} <--- Usage to load a database to use";
         }
-        this.fileNumberIterator++;
-        return TableHelper.createTableWithInput( this.workingDirectory, this.loadedDatabaseName, tableToCreate);
+        //this.fileNumberIterator++;
+        String tableAttribute = this.scanDirectory();
+        if (!tableAttribute.contains("(")) {
+           return tableCreationSyntaxError;
+        }
+        //This flag stops the loop when the end of the table entries is reached
+        Boolean loopFlag = true;
+            while (loopFlag) {
+                if (tableAttribute.contains("(")) {
+                    tableAttribute = tableAttribute.substring(tableAttribute.indexOf("(") + 1);
+                }
+                else {
+                    tableAttribute = this.scanDirectory();
+                }
+                String attributeType = this.scanDirectory();
+                if (attributeType.contains(",")) {
+                    attributeType = attributeType.substring(0, attributeType.indexOf(","));
+                    mapOfAttributes.put(tableAttribute, attributeType);
+                } else if (attributeType.contains(")")) {
+                    if (attributeType.contains("(")) {
+                        attributeType = attributeType.substring(0, attributeType.indexOf(")") + 1);
+                    }
+                    attributeType = attributeType.substring(0, attributeType.indexOf(")") + 1);
+                    mapOfAttributes.put(tableAttribute, attributeType);
+                    loopFlag = false;
+                } else {
+                    return tableCreationSyntaxError;
+                }
+
+            }
+        return TableHelper.createTableWithInput( this.workingDirectory, this.loadedDatabaseName, tableToCreate, mapOfAttributes);
     }
 
     //TODO: fix the file number interator bug that will enter the negatives
@@ -135,6 +169,15 @@ public class DirectoryScan{
         return TableHelper.deleteTableWithInput( this.workingDirectory, this.loadedDatabaseName, tableToDelete);
     }
 
+    public String addToTable (String theTable, String addAttribute, String addType) {
+        Map<String, String> thingsInTable = TableHelper.parseTable(this.workingDirectory, this.loadedDatabaseName, theTable);
+        if (!thingsInTable.get(addAttribute).equals(addType)) {
+            return TableHelper.updateTable(this.workingDirectory, this.loadedDatabaseName, theTable, addAttribute, addType);
+        }
+        else {
+            return addAttribute + " already exists in " + theTable + ".";
+        }
+    }
     public Set<String> getSetOfDirectoryNames () {
         return this.setOfDirectoryNames;
     }
@@ -143,28 +186,45 @@ public class DirectoryScan{
         //do a fancy algorithm that decides the command
         String firstWord  = this.scanDirectory();
         if (firstWord.equalsIgnoreCase("EXIT")) {
-            return "exit";
+            return "exiting database tool";
         }
-        String secondWord = this.scanDirectory();
+        String secondWord = "";
         Boolean semiColonFlag = false;
-        if (secondWord.contains(";")) {
-            secondWord = secondWord.substring(0, secondWord.indexOf(";"));
-            semiColonFlag = true;
-        }
         if (firstWord.equalsIgnoreCase("CREATE")) {
+            secondWord = this.scanDirectory();
+            if (secondWord.contains(";")) {
+                secondWord = secondWord.substring(0, secondWord.indexOf(";"));
+                semiColonFlag = true;
+            }
             return create(secondWord, semiColonFlag);
         }
         else if (firstWord.equalsIgnoreCase("DELETE")) {
+            secondWord = this.scanDirectory();
+            if (secondWord.contains(";")) {
+                secondWord = secondWord.substring(0, secondWord.indexOf(";"));
+                semiColonFlag = true;
+            }
             return delete(secondWord, semiColonFlag);
         }
-        else if (firstWord.equalsIgnoreCase("UPDATE")) {
-            update(secondWord);
+        else if (firstWord.equalsIgnoreCase("ALTER")) {
+            secondWord = this.scanDirectory();
+            if (secondWord.contains(";")) {
+                secondWord = secondWord.substring(0, secondWord.indexOf(";"));
+                return secondWord + " is not a valid ALTER command.";
+            }
+            return update(secondWord);
         }
         else if (firstWord.equalsIgnoreCase("QUERY")) {
+            secondWord = this.scanDirectory();
+            if (secondWord.contains(";")) {
+                secondWord = secondWord.substring(0, secondWord.indexOf(";"));
+                semiColonFlag = true;
+            }
             query(secondWord);
         }
         else if (firstWord.equalsIgnoreCase("USE")) {
-           return use(secondWord);
+            secondWord = this.scanDirectory();
+            return use(secondWord);
         }
         else {return "ERROR! " + firstWord + " is not a valid first command";}
         return "";
@@ -220,23 +280,35 @@ public class DirectoryScan{
             //delete a table
             String databaseToDelete = this.scanDirectory();
             if (databaseToDelete.contains(";")) {
-                return deleteDirectory(new File(workingDirectory + "/" + databaseToDelete.substring(0,databaseToDelete.indexOf(";"))));
+                return deleteDatabase(databaseToDelete.substring(0,databaseToDelete.indexOf(";")));
             }
-            return deleteDirectory(new File(workingDirectory + "/" + databaseToDelete));
+            return deleteDatabase(databaseToDelete);
         }
         return command + " is not a valid DELETE command";
     }
-    private boolean update(String command){
-        int indexOfFirstSpace = command.indexOf(" ");
-        int indexOfFirstSemicolon = command.indexOf(";");
-        if (!(indexOfFirstSpace > indexOfFirstSemicolon)) {
-            return false;
-        }
-        if (command.equals("TABLE")) {
+    private String update(String command){
+        if (command.equalsIgnoreCase("TABLE")) {
             //create a table
-            return true;
+            String tableName = this.scanDirectory();
+            String tableCommand = this.scanDirectory();
+            if (tableCommand.equalsIgnoreCase("ADD")) {
+                String theAttribute = this.scanDirectory();
+                String theType = this.scanDirectory();
+                if (theType.contains(";")) {
+                    theType = theType.substring(theType.indexOf(";"));
+                }
+                return this.addToTable(tableName, theAttribute, theType);
+            } else if (tableCommand.equalsIgnoreCase("DELETE")) {
+                //this.deleteFromTable()
+            }
+            else {
+                return tableCommand + " is not a valid UPDATE TABLE sub-command.";
+            }
         }
-        return false;
+        else {
+            return command + " is not a valid ALTER command.";
+        }
+        return "";
     }
     private void query(String command){
 
