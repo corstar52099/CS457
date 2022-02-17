@@ -1,6 +1,7 @@
 package com.starkscory.cs457.assignment1.java;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -100,8 +101,27 @@ public class DirectoryScan{
             subfile.delete();
         }
         deletingDirectory.delete();
+        this.updateDirectoryNames();
         return "Deleted " + databaseToDelete + " successfully";
     }
+
+    private void updateDirectoryNames() {
+        listOfFiles = folder.listFiles();
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile()) {
+                if (listOfFiles[i].getName().contains("_Table")){
+                    fileNumberIterator++;
+                }
+                setOfFileNames.add(listOfFiles[i].getName());
+            } else if (listOfFiles[i].isDirectory()) {
+                if (listOfFiles[i].getName().contains("_Database")){
+                    folderNumberIterator++;
+                }
+                setOfDirectoryNames.add(listOfFiles[i].getName());
+            }
+        }
+    }
+
     public boolean doesThisDirectoryExist(String thisDirectory){
         //TODO: error catching
         for (String d : setOfDirectoryNames) {
@@ -178,6 +198,15 @@ public class DirectoryScan{
             return addAttribute + " already exists in " + theTable + ".";
         }
     }
+    public String deleteFromTable (String theTable, String delAttribute, String delType) {
+        Map<String, String> thingsInTable = TableHelper.parseTable(this.workingDirectory, this.loadedDatabaseName, theTable);
+        if (thingsInTable.get(delAttribute).equals(delType)) {
+            thingsInTable.remove(delAttribute,delType);
+            return TableHelper.overWriteTable(thingsInTable, theTable, delAttribute, delType) +  delAttribute + " From " + delType + ".";
+        }
+        return delAttribute + " does not exist in " + theTable  + ".";
+    }
+
     public Set<String> getSetOfDirectoryNames () {
         return this.setOfDirectoryNames;
     }
@@ -299,7 +328,12 @@ public class DirectoryScan{
                 }
                 return this.addToTable(tableName, theAttribute, theType);
             } else if (tableCommand.equalsIgnoreCase("DELETE")) {
-                //this.deleteFromTable()
+                String theAttribute = this.scanDirectory();
+                String theType = this.scanDirectory();
+                if (theType.contains(";")) {
+                    theType = theType.substring(0, theType.indexOf(";"));
+                }
+                return this.deleteFromTable(tableName, theAttribute, theType);
             }
             else {
                 return tableCommand + " is not a valid UPDATE TABLE sub-command.";
@@ -308,8 +342,8 @@ public class DirectoryScan{
         else {
             return command + " is not a valid ALTER command.";
         }
-        return "";
     }
+
     private void query(String command){
 
     }

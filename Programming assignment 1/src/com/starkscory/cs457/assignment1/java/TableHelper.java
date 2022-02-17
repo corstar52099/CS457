@@ -86,4 +86,21 @@ public class TableHelper {
             return "Error Updating table";
         }
     }
+
+    public static String overWriteTable(Map<String, String> thingsInTable, String workingDirectory, String loadedDatabase, String tabletoUpdate) {
+        File myObj = new File(workingDirectory + "/" + loadedDatabase + "/" + tabletoUpdate + ".txt");
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(myObj, false));
+            for (Map.Entry<String, String> entry : thingsInTable.entrySet()) {
+                writer.write(entry.getKey() + " | "+ entry.getValue());
+                writer.write("\n");
+            }
+            writer.close();
+            return "Successfully removed ";
+        } catch (IOException e) {
+            return "Error Updating table";
+        }
+    }
+
+
 }
