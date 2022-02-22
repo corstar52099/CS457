@@ -172,7 +172,7 @@ public class DirectoryScan{
                     if (attributeType.contains("(")) {
                         attributeType = attributeType.substring(0, attributeType.indexOf(")") + 1);
                     }
-                    attributeType = attributeType.substring(0, attributeType.indexOf(")") + 1);
+                    attributeType = attributeType.substring(0, attributeType.indexOf(")"));
                     mapOfAttributes.put(tableAttribute, attributeType);
                     loopFlag = false;
                 } else {
