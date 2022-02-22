@@ -2,6 +2,13 @@ from distutils import command
 from genericpath import isfile
 import os, shutil
 from re import sub
+
+# AUTHOR: Cory Starks
+# Date: 02/21/2022
+# Class: CS457
+# Assignment: Project 1
+
+
 def removeOuterParentheses(self):
         stack = []
         res=""
@@ -21,35 +28,46 @@ def removeOuterParentheses(self):
         return res
 
 def makeAndFillTable(filename, contents):
-    with open(filename, 'w') as f:
+    with open(filename + ".txt", 'w') as f:
         for s in contents:
             s = s.strip()
             f.write(s + "\n")
 
+#alter a table
+# @param filename: the name of the file
+# @param fun: the type of function (add or delete)
+# @param thingChanging: the individual metadata changing
 def alterTable(filename, fun, thingChanging):
-    print("gets here")
     if (fun.lower() == 'add'):
-        with open(filename, 'a') as f:
+        with open(filename + ".txt", 'a') as f:
             f.write(thingChanging + "\n")
     elif (fun.lower() == 'delete'):
-        with open(filename, 'r') as f:
+        with open(filename + ".txt", 'r') as f:
             contents = f.read()
-        with open(filename, 'w') as f:
+        with open(filename + ".txt", 'w') as f:
             contents.remove(thingChanging)
             f.write(thingChanging)
-#TODO: need to make it so that if the table already exists do not do anything
+
 if __name__ == "__main__":
+
     print("Welcome to Cory's database tool")
     curDatabase = None
     startingDir = os.getcwd()
     commandString = input()
+    #Split up each individual command
     commandArray = commandString.split(";")
-    print(commandArray)
+
+    #Main loop
     while (commandArray != 'exit'):
         for s in commandArray:
+            #Split each individual command by space
             subCommand = s.split(" ")
+            #Remvove any empty elements in the command
             while("" in subCommand) :
                 subCommand.remove("")
+            #Skip this command if it's empty
+            if (len(subCommand) == 0):
+                continue
             if (subCommand[0].lower() == 'use'):
                 try:
                     os.chdir(startingDir + '/' + subCommand[1])
@@ -59,7 +77,6 @@ if __name__ == "__main__":
                     print("Could not create database becasue of %s." % e)
             elif (subCommand[0].lower() == 'create'):
                 if (subCommand[1].lower() == 'database'):
-                   # print("gets here")
                     try:
                         os.mkdir(subCommand[2])
                         print("Database " + subCommand[2] + " created.")
@@ -74,10 +91,8 @@ if __name__ == "__main__":
                         continue
                     x = subCommand[3:len(subCommand)]
                     tableCon = ' '.join(x)
-                    #get rid of parenthesis then turn back to an array
                     tableCon  = removeOuterParentheses(tableCon)
                     tableStr = ''.join(tableCon)
-                    #tablestr = removeOuterParentheses(tableStr)
                     tableStr = tableStr.split(",")
                     try: 
                         makeAndFillTable(subCommand[2], tableStr)
@@ -87,7 +102,7 @@ if __name__ == "__main__":
             elif (subCommand[0].lower() == 'drop'):
                 if (subCommand[1].lower() == 'table'):
                     try:
-                        os.remove(subCommand[2])
+                        os.remove(subCommand[2] + ".txt")
                         print("Table %s deleted." % subCommand[2])
                     except Exception as e:
                         print ("Failed to delete table %s becasue of %s" % (subCommand[2], e))
@@ -100,20 +115,24 @@ if __name__ == "__main__":
                                     os.unlink(file_path)
                                 elif os.path.isdir(file_path):
                                     shutil.rmtree(file_path)
-                                print("Database %s deleted." % subCommand[2])
                             except Exception as e:
                                 print('Failed to delete database %s becasue %s' % (subCommand[2], e))
                         os.rmdir(startingDir + '/' + subCommand[2])
+                        print("Database %s deleted." % subCommand[2])
                     except Exception as e:
                         print('Failed to delete database %s becasue %s' % (subCommand[2], e))
             elif (subCommand[0].lower() == 'alter'):
                 if(subCommand[1].lower() == 'table'):
-                    alterTable(subCommand[2], subCommand[3], ' '.join(subCommand[4:6]))
+                    try:
+                        alterTable(subCommand[2], subCommand[3], ' '.join(subCommand[4:6]))
+                        print("Table %s modified." % subCommand[2])
+                    except Exception as e:
+                        print("Failed to alter table becasue of %s." % s)
             elif (subCommand[0].lower() == 'select'):
                 if (subCommand[1].lower() == '*'):
                     if (subCommand[2].lower() == 'from'):
                         try:
-                            with open(subCommand[3], 'r') as f:
+                            with open(subCommand[3] + ".txt", 'r') as f:
                                 print(f.read())
                         except Exception as e:
                             print("Failed to select from table becasue of %s" % e)
