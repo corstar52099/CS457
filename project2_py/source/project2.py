@@ -4,12 +4,11 @@ from re import L, sub
 from source import databaseHelper as db
 
 # AUTHOR: Cory Starks
-# Date: 02/21/2022
+# Date: 03/26/2022
 # Class: CS457
 # Assignment: Project 2
 def project2Script(inp = None):
     try:
-        
             #print("Welcome to Cory's database tool")
             curDatabase = None
         
@@ -37,7 +36,9 @@ def project2Script(inp = None):
                         commandArray[i] = ele.replace(";", "")
                         break
                     commandArray[i] = ele.replace("\n", "")
-                    print("COMMAND: %s" % commandArray[i])
+
+                    #Remove the '#' if you would like to see the list of commands passed and how they are parsed
+                    #print("COMMAND: %s" % commandArray[i])
                     i += 1
     
             #Split up each individual command
@@ -115,11 +116,13 @@ def project2Script(inp = None):
                     
                     #Select from a table
                     loopCommands.selectFromMetaData(curDatabase, subCommand[1 : len(subCommand)])
-                    else:
-                        loopCommands.print_buffer.append("%s is not a valid select * command" % subCommand[1])
                         
                 elif (subCommand[0].lower() == 'insert'):
                     if (subCommand[1].lower() == 'into'):
+
+                        #insert into table with valueString being the combintation of commands given
+                        #and values being all of the data that is planned to be inserted.
+                        #subCommand[2] is the table name and curDatabase is current database
                         valueString = ' '.join([str(elem) for elem in subCommand])
                         if (loopCommands.insertIntoSyntax(subCommand[3], subCommand[-1])):
                             values = valueString[valueString.index('(') + 1 : valueString.index(')')].split(',')
@@ -130,13 +133,23 @@ def project2Script(inp = None):
                             loopCommands.insertInto(curDatabase , subCommand[2], values)
                     else:
                         loopCommands.print_buffer.append("%s is not a valid insert command" % subCommand[1])
+
                 elif (subCommand[0].lower() == 'update'):
-                    #tableName = subCommand[1]
                     if (subCommand[2].lower() == 'set'):
+
+                        #update table by changing the value of some element
+                        #subCommand[1] is the table name
+                        #subCommand[2 : len(subCommand)] is the command that follows the table name
                         loopCommands.updateTable(curDatabase, subCommand[1], subCommand[2 : len(subCommand)])
+
                 elif (subCommand[0].lower() == 'delete'):
                     if (subCommand[1].lower() == 'from'):
+
+                        #Delete a specified element from a table 
+                        #subCommand[2] is the table name to delete from
+                        #subCommand[3: len(subCommand)] is the rest of the command after table name
                         loopCommands.deleteFromTable(curDatabase, subCommand[2], subCommand[3: len(subCommand)])
+
                     else:
                         loopCommands.print_buffer.append(subCommand[1] + " is not a valid delete command")
                 elif (subCommand[0].lower() == '.exit'):
@@ -147,4 +160,4 @@ def project2Script(inp = None):
             #Print the results        
             loopCommands.printBuffer()
     except Exception as e:
-        print('.exit %s' % e)  
+        print('.exit %s' % e)

@@ -3,6 +3,11 @@ from operator import mod, ne, truediv
 import os, shutil
 from genericpath import isfile
 
+# AUTHOR: Cory Starks
+# Date: 03/26/2022
+# Class: CS457
+# Assignment: Project 2
+
 #CLASS: databaseHelper
 #This class functions as a helper for project2.py.
 #The class contains functions that are meant to run in a singular instance
@@ -109,6 +114,9 @@ class databaseHelper:
         except Exception as e:
             self.print_buffer.append("Failed to create table %s becasue of %s." % (tableName, e))
 
+    #create a database in the current working directory
+    # @param startingDir: The name of the starting directory 
+    # @param databaseName: The name of the database to create
     def createDatabase(self, startingDir, databaseName):
         try:
             os.mkdir(startingDir + "/" +databaseName)
@@ -116,6 +124,9 @@ class databaseHelper:
         except Exception as e:
             self.print_buffer.append("Failed to create database %s becasuse %s" % (databaseName, e))
 
+    #delete a table in the current database
+    # @param startingDir: The name of the starting directory 
+    # @param tableToDrop: The name of the table to delete
     def dropTable(self, curDatabase, tableToDrop):
         try:
             os.remove(curDatabase + "/" + tableToDrop + ".txt")
@@ -123,8 +134,13 @@ class databaseHelper:
         except Exception as e:
             self.print_buffer.append("Failed to delete table %s becasue of %s" % (tableToDrop, e))
 
+    #delete a database in from the current working directory
+    # @param startingDir: The name of the starting directory 
+    # @param databaseToDrop: The name of the database being deleted
     def dropDatabase(self, startingDir, databaseToDrop):
         try:
+            #we must delete all of the files within the database first
+            #because os doesnt allow us to delete a folder that contains files
             for filename in os.listdir(startingDir + '/' + databaseToDrop):
                 file_path = os.path.join(startingDir + '/' + databaseToDrop, filename)
             try:
@@ -139,7 +155,11 @@ class databaseHelper:
         except Exception as e:
             self.print_buffer.append('Failed to delete database %s becasue %s' % (databaseToDrop, e))
 
-    
+    #select specific criteria from the database
+    # @param  curDatabase: The name of the current database
+    # @param command: A string containing contents of the command that 
+    #                   will use this function. The function will parse
+    #                   this command and determine what to do with it
     def selectFromMetaData(self, curDatabase, command):
 
         attributeArr = []
@@ -198,6 +218,7 @@ class databaseHelper:
                     continue
                 data = line.split(' | ')
                 stringBuilder = []
+
                 #convert the types before making comparisons
                 if (attType == 'float'):
                             data[attIndex] = float(data[attIndex])
@@ -205,6 +226,8 @@ class databaseHelper:
                 elif (attType == 'int'):
                     data[attIndex] = int(data[attIndex]) 
                     attValue = int(attValue)
+
+                #Generate output based on the type of comparison being made
                 if (comparison == '!='):
                     if (data[attIndex] != attValue):
                         for index in Indecies:
@@ -245,10 +268,16 @@ class databaseHelper:
             for ele in outputArr:
                 self.print_buffer.append(ele)
 
+    #print the current print buffer which will contain contents
+    #that are collected from the commands executed in this object
     def printBuffer(self):
         for s in self.print_buffer:
             print(s)
 
+    #insert specific data into a table
+    # @param curDatabase: The name of the current database.
+    # @param table: The name of the table to insert into
+    # @param data: The specific data that will be inserted into the table
     def insertInto(self, curDatabase, table, data):
         if (self.checkValidDataEntry(curDatabase, table, data)):
             with open(curDatabase + "/%s.txt" % table, 'a') as f:
@@ -257,6 +286,9 @@ class databaseHelper:
         else:
             self.print_buffer.append("Falied to insert table %s becasue data is invalid." % table)
 
+    #A boolean type function that checks for valid syntax of inserting
+    # @param stringToCheck: The string that needs to be validated.
+    # @param lastString: The final string of the insert command.
     def insertIntoSyntax(self, stringToCheck, lastString):
         substring = "values("
         if( stringToCheck != None and substring in stringToCheck):
@@ -266,6 +298,10 @@ class databaseHelper:
         else:
             return False
     
+    #A boolean type function that checks if data is valid and can be inserted into table
+    # @param curDatabase: The name of the current database.
+    # @param table: The name of the table that is used for validation of data
+    # @param data: The data that is attepting to be inserted
     def checkValidDataEntry(self, curDatabase, table, data):
         try:
             with open("%s/%s.txt" % (curDatabase, table), 'r') as f:
@@ -321,7 +357,11 @@ class databaseHelper:
         except:
             return False
 
-    
+    #update table with specific criteria
+    # @param curDatabase: The name of the current database
+    # @param table: The table being updated
+    # @param command: The string of the command that will be parsed by
+    #                   this function to determine what sort of update to make
     def updateTable(self, curDatabase, table, command):
         try:
             if (self.checkValidUpdate(curDatabase, table, command)):
@@ -371,6 +411,12 @@ class databaseHelper:
         except:
             self.print_buffer.append("Failed to update %s becasue of invalid update." % table)
 
+    #Overwrite a table with the information given in lineArr
+    #NOTE: this function should always work because lineArr
+    #           is expected to be valid
+    # @param curDatabase: The name of the current database
+    # @param table: The name of the table being overwriten
+    # @param lineArr: Data being written into the table
     def writeTable(self, curDatabase, table, lineArr):
         with open("%s/%s.txt" % (curDatabase, table), "w") as f:
             i = 0
@@ -381,9 +427,16 @@ class databaseHelper:
                 f.write(ele + "\n")
                 i += 1
 
+    #Delete certain data from table with given criteria
+    # @param curDatabase: The name of the current database
+    # @param table: The name of the table being updated
+    # @param command: The string of content given by the command
+    #                       that will determine what happens.
     def deleteFromTable(self, curDatabase, table, command):
         try:
             if (self.checkValidDelete(curDatabase, table, command)):
+
+                #Assign and get variables from command
                 modifications = 0
                 comparison = command[2]
                 whereAttribute = command[1]
@@ -407,12 +460,16 @@ class databaseHelper:
                             i += 1
                             continue
                         lineArr = line.split(" | ")
+
+                        #convert the typed based on the type being sought
                         if (whereType == 'float'):
                             lineArr[whereIndex] = float(lineArr[whereIndex])
                             whereVal = float(whereVal)
                         elif (whereType == 'int'):
                             lineArr[whereIndex] = int(lineArr[whereIndex]) 
                             whereVal = int(whereVal)
+
+                        #make the modification basxed on the given comparison
                         if(comparison == "="):
                             if (lineArr[whereIndex] == whereVal):
                                 modifications += 1
@@ -448,6 +505,9 @@ class databaseHelper:
         except Exception as e:
             self.print_buffer.append("Failed to delete from table because of %s" % e)
 
+    #Check that the delete command being attempted is valid
+    # @param curDatabase: The name of the current database
+    # @param command: The string of command that needs to be validated for deleting
     def checkValidDelete(self, curDatabase, table, command):
         try:
             if (command[0].lower() == "where"):
@@ -464,6 +524,10 @@ class databaseHelper:
         except:
             return False
 
+    #Check if the update bieng attempted is valid
+    # @param curDatabase: The name of the current database
+    # @param table: The name of the table attempting to be updated
+    # @param command: The string of command that needs to be validated for updating
     def checkValidUpdate(self, curDatabase, table, command):
         try:
             if (command[0].lower() == "set"):
@@ -480,6 +544,7 @@ class databaseHelper:
             return False
         except:
             return False
+
     #Check if attribute and the corresponding data is valid
     # @param curDatabase: the current working database
     # @param table: the table in question
